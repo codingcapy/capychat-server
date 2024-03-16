@@ -20,14 +20,14 @@ import comments from "./routes/comments";
 
 dotenv.config();
 const app = express();
-const port = 3333;
+const port = process.env.PORT || 3333;;
 
 app.use(cors())
 app.use(express.json())
 const server = http.createServer(app);
 const io = new SocketServer(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://codingcapy.github.io",
   },
 });
 io.on("connection", (socket) => {

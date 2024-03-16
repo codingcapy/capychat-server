@@ -3,15 +3,15 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { pgTable, serial, text, varchar, date, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 
 const Pool = pg.Pool
+
+const connectionString = "postgresql://postgres:upqVUxABzeaUqIQadpjbBYmJmgpvglIm@monorail.proxy.rlwy.net:58027/railway"
+
 export const pool = new Pool(
     {
-        user: "postgres",
-        host: "localhost",
-        database: "sooda",
-        password: "Stevefox1!",
-        port: 5432
+        connectionString,
     }
 );
+
 export const db = drizzle(pool);
 
 export const users = pgTable('users', {
