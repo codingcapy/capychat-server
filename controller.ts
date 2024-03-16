@@ -130,9 +130,8 @@ export async function addFriend(req: Request, res: Response) {
         }
         const friendId = friendResult[0].user_id;
         const userResult = await db.select().from(users).where(eq(users.username, username));
-        console.log(userResult);
         const userId = userResult[0].user_id;
-        const friendshipResult = await db.select().from(user_friends).where(eq(user_friends.user_id, userId) && eq(user_friends.friend_id, friendId));
+        const friendshipResult = await db.select().from(user_friends).where(and(eq(user_friends.user_id, userId), eq(user_friends.friend_id, friendId)));
         if (friendshipResult.length > 0) {
             return res.json({ success: false, message: "User is already your friend!" });
         }
