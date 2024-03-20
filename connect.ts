@@ -32,13 +32,13 @@ export const user_friends = pgTable('user_friends', {
     display_name: varchar('display_name', { length: 32 })
 })
 
-export const chats = pgTable('chats',{
+export const chats = pgTable('chats', {
     chat_id: serial('chat_id').primaryKey(),
-    title: varchar('title', {length:80}),
+    title: varchar('title', { length: 80 }),
     created_at: timestamp('created_at').defaultNow(),
 })
 
-export const user_chats = pgTable('user_chats',{
+export const user_chats = pgTable('user_chats', {
     user_chat_id: serial('user_chat_id').primaryKey(),
     user_id: integer('user_id'),
     chat_id: integer('chat_id')
@@ -46,7 +46,9 @@ export const user_chats = pgTable('user_chats',{
 
 export const messages = pgTable('messages', {
     message_id: serial('message_id').primaryKey(),
-    content: varchar('content', {length:25000}),
+    content: varchar('content', { length: 25000 }),
+    reply_username: varchar('reply_username', { length: 32 }),
+    reply_content: varchar('reply_content', { length: 25000 }),
     created_at: timestamp('created_at').defaultNow(),
     username: varchar('username'),
     chat_id: integer('chat_id')
@@ -55,6 +57,6 @@ export const messages = pgTable('messages', {
 export const comments = pgTable('comments', {
     comment_id: serial('comment_id').primaryKey(),
     email: varchar('email', { length: 255 }),
-    content: varchar('content', {length:25000}),
+    content: varchar('content', { length: 25000 }),
     created_at: timestamp('created_at').defaultNow(),
 })

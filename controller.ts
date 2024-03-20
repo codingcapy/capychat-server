@@ -230,8 +230,10 @@ export async function createMessage(req: Request, res: Response) {
     const inputContent = req.body.content;
     const user = req.body.user;
     const chatId = req.body.chatId;
+    const reply_username = req.body.reply_username;
+    const reply_content = req.body.reply_content;
     try {
-        await db.insert(messages).values({ content: inputContent, username: user, chat_id: chatId });
+        await db.insert(messages).values({ content: inputContent, reply_content: reply_content, reply_username: reply_username, username: user, chat_id: chatId });
         res.status(200).json({ success: true, message: "Message added successfully!" });
     }
     catch (err) {

@@ -28,6 +28,8 @@ CREATE TABLE chats(
 CREATE TABLE messages(
     message_id SERIAL PRIMARY KEY,
     content VARCHAR(25000),
+    reply_content VARCHAR(25000),
+    reply_username VARCHAR(32),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     username VARCHAR(32),
     chat_id INTEGER
