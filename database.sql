@@ -16,6 +16,7 @@ CREATE TABLE user_friends(
     user_id INTEGER,
     friend_id INTEGER,
     blocked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     display_name VARCHAR(32)
 );
 
@@ -38,7 +39,8 @@ CREATE TABLE messages(
 CREATE TABLE user_chats(
     user_chat_id SERIAL PRIMARY KEY,
     user_id INTEGER,
-    chat_id INTEGER
+    chat_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE comments(

@@ -70,6 +70,15 @@ export async function searchUserById(id: number) {
 
 export async function createUser(req: Request, res: Response) {
     const { username, password, email } = req.body
+    if (username.length > 32){
+        return res.json({ success: false, message: "Username max char limit is 32" });
+    }
+    if (password.length > 80){
+        return res.json({ success: false, message: "password max char limit is 80" });
+    }
+    if (email.length > 255){
+        return res.json({ success: false, message: "email max char limit is 255" });
+    }
     try {
         const usernameQuery = await db.select().from(users).where(eq(users.username, username))
         if (usernameQuery.length > 0) {
@@ -81,7 +90,9 @@ export async function createUser(req: Request, res: Response) {
         };
         const encrypted = await bcrypt.hash(password, saltRounds);
         const displayName = username;
-        await db.insert(users).values({ username, password: encrypted.toString(), email, display_name: displayName });
+        const now = new Date();
+        const timestamp = now.toISOString();
+        await db.insert(users).values({ username, password: encrypted.toString(), email, display_name: displayName, created_at: timestamp });
         res.status(201).send({ success: true, message: "Sign up successful!" })
     }
     catch (err) {
@@ -135,8 +146,10 @@ export async function addFriend(req: Request, res: Response) {
         if (friendshipResult.length > 0) {
             return res.json({ success: false, message: "User is already your friend!" });
         }
-        await db.insert(user_friends).values({ user_id: userId, friend_id: friendId, display_name: friend });
-        await db.insert(user_friends).values({ user_id: friendId, friend_id: userId, display_name: username });
+        const now = new Date();
+        const timestamp = now.toISOString();
+        await db.insert(user_friends).values({ user_id: userId, friend_id: friendId, display_name: friend, created_at: timestamp });
+        await db.insert(user_friends).values({ user_id: friendId, friend_id: userId, display_name: username, created_at: timestamp });
         res.status(201).send({ success: true, message: "User Friend created successfully" });
     } catch (error) {
         console.error("Error adding friend:", error);
@@ -160,17 +173,22 @@ export async function getFriends(req: Request, res: Response) {
 export async function createChat(req: Request, res: Response) {
     try {
         const title = req.body.title;
+        if (title.length > 255){
+            return res.json({ success: false, message: "Title max char limit is 32" });
+        }
         const incomingUser = req.body.user;
         const userQuery = await db.select().from(users).where(eq(users.username, incomingUser));
         const user = userQuery[0]
         const incomingFriend = req.body.friend;
         const friendQuery = await db.select().from(users).where(eq(users.username, incomingFriend));
         const friend = friendQuery[0]
-        await db.insert(chats).values({ title: title });
+        const now = new Date();
+        const timestamp = now.toISOString();
+        await db.insert(chats).values({ title: title, created_at: timestamp });
         const chatsQuery = await db.select().from(chats).where(eq(chats.title, title))
         const chatId = chatsQuery[chatsQuery.length - 1].chat_id;
-        await db.insert(user_chats).values({ user_id: user.user_id, chat_id: chatId });
-        await db.insert(user_chats).values({ user_id: friend.user_id, chat_id: chatId });
+        await db.insert(user_chats).values({ user_id: user.user_id, chat_id: chatId, created_at: timestamp });
+        await db.insert(user_chats).values({ user_id: friend.user_id, chat_id: chatId, created_at: timestamp });
         res.status(200).json({ success: true, message: "Chat added successfully!" });
     }
     catch (err) {
@@ -232,8 +250,13 @@ export async function createMessage(req: Request, res: Response) {
     const chatId = req.body.chatId;
     const reply_username = req.body.reply_username;
     const reply_content = req.body.reply_content;
+    if (inputContent.length > 25000){
+        return res.json({ success: false, message: "content max char limit is 25000" });
+    }
+    const now = new Date();
+    const timestamp = now.toISOString();
     try {
-        await db.insert(messages).values({ content: inputContent, reply_content: reply_content, reply_username: reply_username, username: user, chat_id: chatId });
+        await db.insert(messages).values({ content: inputContent, reply_content: reply_content, reply_username: reply_username, username: user, chat_id: chatId, created_at: timestamp });
         res.status(200).json({ success: true, message: "Message added successfully!" });
     }
     catch (err) {
@@ -273,7 +296,12 @@ export async function createComment(req: Request, res: Response) {
     try {
         const email = req.body.email;
         const content = req.body.content;
-        await db.insert(comments).values({ email: email, content: content });
+        if (content.length > 50000){
+            return res.json({ success: false, message: "content max char limit is 50000" });
+        }
+        const now = new Date();
+        const timestamp = now.toISOString();
+        await db.insert(comments).values({ email: email, content: content, created_at: timestamp });
         res.status(200).json({ success: true });
     }
     catch (err) {
