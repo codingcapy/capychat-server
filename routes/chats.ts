@@ -7,13 +7,13 @@ description: chats route for CapyTalk API server
  */
 
 import express from "express";
-import { createChat, getChat, getChats, leaveChat } from "../controller";
+import { createChat, getChat, getChats, leaveChat, updateChat } from "../controller";
 
 const chats = express.Router();
 
 chats.route('/').post(createChat);
 chats.route('/user/:userId').get(getChats);
-chats.route('/:chatId').get(getChat).post();
+chats.route('/:chatId').get(getChat).post(updateChat);
 chats.route('/chat/:chatId').post(leaveChat);
 
 export default chats;

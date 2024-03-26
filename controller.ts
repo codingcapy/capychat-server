@@ -244,6 +244,20 @@ export async function leaveChat(req: Request, res: Response) {
     }
 }
 
+export async function updateChat(req: Request, res: Response) {
+    try {
+        const title = req.body.title;
+        const chatId = req.params.chatId;
+        //@ts-ignore
+        await db.update(chats).set({ title }).where(eq(chats.chat_id, chatId));
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error updating chat" });
+    }
+}
+
 export async function createMessage(req: Request, res: Response) {
     const inputContent = req.body.content;
     const user = req.body.user;
