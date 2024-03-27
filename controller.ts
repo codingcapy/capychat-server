@@ -258,6 +258,34 @@ export async function updateChat(req: Request, res: Response) {
     }
 }
 
+export async function addFriendToChat(req: Request, res: Response) {
+    try {
+        const chatId = req.params.chatId;
+        const incomingUser = req.body.user;
+        const incomingFriend = req.body.friend;
+        if (incomingUser === incomingFriend) {
+            return res.json({ success: false, message: "That's yourself!" });
+        }
+        const friendQuery = await db.select().from(users).where(eq(users.username, incomingFriend));
+        if (friendQuery.length === 0) {
+            return res.json({ success: false, message: "User does not exist" });
+        }
+        const friend = friendQuery[0]
+        //@ts-ignore
+        const memberResult = await db.select().from(user_chats).where(and(eq(user_chats.user_id, friend.user_id), eq(user_chats.chat_id, chatId)));
+        if (memberResult.length > 0) {
+            return res.json({ success: false, message: "User is already in chat!" });
+        }
+        //@ts-ignore
+        await db.insert(user_chats).values({ user_id: friend.user_id, chat_id: chatId });
+        res.status(200).json({ success: true, message: "Friend added to chat successfully!" });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error adding friend to chat" });
+    }
+}
+
 export async function createMessage(req: Request, res: Response) {
     const inputContent = req.body.content;
     const user = req.body.user;
