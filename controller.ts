@@ -24,7 +24,7 @@ export async function validateUser(req: Request, res: Response) {
                 return res.status(500).send("Internal Server Error");
             }
             if (result) {
-                const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET || "default_secret", { expiresIn: "2 days" });
+                const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET || "default_secret", { expiresIn: "14 days" });
                 return res.json({ result: { user, token } });
             } else {
                 return res.json({ result: { user: null, token: null } });
@@ -45,8 +45,10 @@ export async function decryptToken(req: Request, res: Response) {
             return "";
         }
         const token = authHeader.split(" ")[1];
-        const decodedUser = jwt.verify(token, "secret");
-        const user = searchUserById((decodedUser as IDecodedUser).userId);
+        const decodedUser = jwt.verify(token, "default_secret");
+        //@ts-ignore
+        const response = await db.select().from(users).where(eq(users.user_id, decodedUser.id));
+        const user = response[0]
         res.json({ result: { user, token } });
     }
     catch (err) {
