@@ -1,3 +1,11 @@
+
+/*
+Author: Paul Kim
+Date: February 14, 2024
+Version: 1.0.0
+Description: postgres db connect for CapyChat server
+ */
+
 import pg from "pg"
 import { drizzle } from "drizzle-orm/node-postgres";
 import { pgTable, serial, text, varchar, date, boolean, timestamp, integer } from "drizzle-orm/pg-core";

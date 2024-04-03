@@ -1,9 +1,9 @@
 
 /*
 author: Paul Kim
-date: February 8, 2024
-version: 1.0
-description: messages route for CapyTalk API server
+date: February 14, 2024
+Version: 1.0.0
+description: messages route for CapyChat API server
  */
 
 import express from "express";

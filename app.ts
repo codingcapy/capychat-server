@@ -1,9 +1,9 @@
 
 /*
-Author: Paul, Jessie, Beanie
+Author: Paul Kim
 Date: February 14, 2024
-Version: 0.0.1
-Description: App for Sooda server
+Version: 1.0.0
+Description: app for CapyChat server
  */
 
 import express from "express";

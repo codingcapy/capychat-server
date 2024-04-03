@@ -1,4 +1,10 @@
 
+/*
+Author: Paul Kim
+Date: February 14, 2024
+Version: 1.0.0
+Description: controller for CapyChat server
+ */
 
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
