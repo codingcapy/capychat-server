@@ -78,13 +78,13 @@ export async function searchUserById(id: number) {
 
 export async function createUser(req: Request, res: Response) {
     const { username, password, email } = req.body
-    if (username.length > 32){
+    if (username.length > 32) {
         return res.json({ success: false, message: "Username max char limit is 32" });
     }
-    if (password.length > 80){
+    if (password.length > 80) {
         return res.json({ success: false, message: "password max char limit is 80" });
     }
-    if (email.length > 255){
+    if (email.length > 255) {
         return res.json({ success: false, message: "email max char limit is 255" });
     }
     try {
@@ -137,6 +137,34 @@ export async function updateUser(req: Request, res: Response) {
     }
 }
 
+export async function blockUser(req: Request, res: Response) {
+    try {
+        const userId = req.body.userId;
+        const friendName = req.params.friendName;
+        const friend = await db.select().from(users).where(eq(users.username, friendName));
+        await db.update(user_friends).set({ blocked: true }).where(and(eq(user_friends.user_id, userId), eq(user_friends.friend_id, friend[0].user_id)));
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error blocking user" });
+    }
+}
+
+export async function unblockUser(req: Request, res: Response) {
+    try {
+        const userId = req.body.userId;
+        const friendName = req.params.friendName;
+        const friend = await db.select().from(users).where(eq(users.username, friendName));
+        await db.update(user_friends).set({ blocked: false }).where(and(eq(user_friends.user_id, userId), eq(user_friends.friend_id, friend[0].user_id)));
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error blocking user" });
+    }
+}
+
 export async function addFriend(req: Request, res: Response) {
     try {
         const { friend, username } = req.body;
@@ -181,7 +209,7 @@ export async function getFriends(req: Request, res: Response) {
 export async function createChat(req: Request, res: Response) {
     try {
         const title = req.body.title;
-        if (title.length > 255){
+        if (title.length > 255) {
             return res.json({ success: false, message: "Title max char limit is 32" });
         }
         const incomingUser = req.body.user;
@@ -300,7 +328,7 @@ export async function createMessage(req: Request, res: Response) {
     const chatId = req.body.chatId;
     const reply_username = req.body.reply_username;
     const reply_content = req.body.reply_content;
-    if (inputContent.length > 25000){
+    if (inputContent.length > 25000) {
         return res.json({ success: false, message: "content max char limit is 25000" });
     }
     const now = new Date();
@@ -346,7 +374,7 @@ export async function createComment(req: Request, res: Response) {
     try {
         const email = req.body.email;
         const content = req.body.content;
-        if (content.length > 50000){
+        if (content.length > 50000) {
             return res.json({ success: false, message: "content max char limit is 50000" });
         }
         const now = new Date();
