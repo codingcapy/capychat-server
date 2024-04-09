@@ -165,6 +165,21 @@ export async function unblockUser(req: Request, res: Response) {
     }
 }
 
+export async function getUserFriend(req:Request, res:Response){
+    try{
+        const userId = req.body.userId;
+        const friendName = req.params.friendName;
+        const friend = await db.select().from(users).where(eq(users.username, friendName));
+        const response = await db.select().from(user_friends).where(and(eq(user_friends.user_id, parseInt(userId)), eq(user_friends.friend_id, friend[0].user_id)));
+        const userFriend = response[0]
+        res.status(200).json(userFriend);
+    }
+    catch (err){
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error getting user friend" });
+    }
+}
+
 export async function addFriend(req: Request, res: Response) {
     try {
         const { friend, username } = req.body;
