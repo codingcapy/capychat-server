@@ -12,6 +12,8 @@ import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { pool, db, users, user_friends, chats, user_chats, messages, comments } from "./connect";
 import { eq, and } from "drizzle-orm";
+import dotenv from "dotenv";
+dotenv.config();
 
 const saltRounds = 6
 
@@ -430,7 +432,7 @@ export function sendEmail(email: string) {
             secure: true,
             auth: {
                 user: "capychat1@gmail.com",
-                pass: "vyfv jium udrz eclj",
+                pass: process.env.EMAIL_PASSWORD,
             },
         });
 
