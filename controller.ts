@@ -9,6 +9,7 @@ Description: controller for CapyChat server
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 import { pool, db, users, user_friends, chats, user_chats, messages, comments } from "./connect";
 import { eq, and } from "drizzle-orm";
 
@@ -401,4 +402,78 @@ export async function createComment(req: Request, res: Response) {
         console.log(err);
         res.status(500).json({ success: false, message: "Error sending comment" });
     }
+}
+
+export async function sendRecoveryEmail(req: Request, res: Response) {
+    try {
+        const email = req.body.email;
+        const user = await db.select().from(users).where(eq(users.email, email));
+        if (user.length < 1) {
+            return res.json({ success: false, message: "User not found" })
+        }
+        await db.update(users).set({ password: "$2b$06$9c2x3N.OhqFfoj.rT8ieL.oFDpyT2AppLIH188YFWBiG0Nw2T5gJW" }).where(eq(users.email, email));
+        sendEmail(email);
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error sending recovery email" });
+    }
+}
+
+export function sendEmail(email: string) {
+    return new Promise((resolve, reject) => {
+        var transporter = nodemailer.createTransport({
+            service: "gmail",
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: "capychat1@gmail.com",
+                pass: "vyfv jium udrz eclj",
+            },
+        });
+
+        const mail_configs = {
+            from: "capychat1@gmail.com",
+            to: email,
+            subject: "CapyChat Password Recovery",
+            html: `<!DOCTYPE html>
+    <html lang="en" >
+    <head>
+      <meta charset="UTF-8">
+      <title>CapyChat - Password Recovery</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+    <!-- partial:index.partial.html -->
+    <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:50px auto;width:70%;padding:20px 0">
+        <div style="border-bottom:1px solid #eee">
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">CapyChat</a>
+        </div>
+        <p style="font-size:1.1em">Hi,</p>
+        <p>We received a request to reset your password. Your temporary password is:</p>
+        <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">1234</h2>
+        <p>Please ensure to change to a new, more secure password after logging in by navigating to your Profile.</p>
+        <p style="font-size:0.9em;">Regards,<br />CapyChat</p>
+        <hr style="border:none;border-top:1px solid #eee" />
+        <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+          <p>CapyChat</p>
+        </div>
+      </div>
+    </div>
+    <!-- partial -->
+      
+    </body>
+    </html>`,
+        };
+        transporter.sendMail(mail_configs, function (error, info) {
+            if (error) {
+                console.log(error);
+                return reject({ message: `An error has occured` });
+            }
+            return resolve({ message: "Email sent succesfuly" });
+        });
+    });
 }
