@@ -168,8 +168,8 @@ export async function unblockUser(req: Request, res: Response) {
     }
 }
 
-export async function getUserFriend(req:Request, res:Response){
-    try{
+export async function getUserFriend(req: Request, res: Response) {
+    try {
         const userId = req.body.userId;
         const friendName = req.params.friendName;
         const friend = await db.select().from(users).where(eq(users.username, friendName));
@@ -177,7 +177,7 @@ export async function getUserFriend(req:Request, res:Response){
         const userFriend = response[0]
         res.status(200).json(userFriend);
     }
-    catch (err){
+    catch (err) {
         console.log(err);
         res.status(500).json({ success: false, message: "Error getting user friend" });
     }
@@ -406,15 +406,16 @@ export async function createComment(req: Request, res: Response) {
     }
 }
 
-export async function sendRecoveryEmail(req: Request, res: Response) {
+export async function sendResetEmail(req: Request, res: Response) {
     try {
         const email = req.body.email;
-        const user = await db.select().from(users).where(eq(users.email, email));
-        if (user.length < 1) {
+        const result = await db.select().from(users).where(eq(users.email, email));
+        if (result.length < 1) {
             return res.json({ success: false, message: "User not found" })
         }
+        const user = result[0];
         await db.update(users).set({ password: "$2b$06$9c2x3N.OhqFfoj.rT8ieL.oFDpyT2AppLIH188YFWBiG0Nw2T5gJW" }).where(eq(users.email, email));
-        sendEmail(email);
+        sendPasswordEmail(email, user.username || "");
         res.status(200).json({ success: true });
     }
     catch (err) {
@@ -423,7 +424,24 @@ export async function sendRecoveryEmail(req: Request, res: Response) {
     }
 }
 
-export function sendEmail(email: string) {
+export async function sendRecoveryEmail(req: Request, res: Response) {
+    try {
+        const email = req.body.email;
+        const result = await db.select().from(users).where(eq(users.email, email));
+        if (result.length < 1) {
+            return res.json({ success: false, message: "User not found" })
+        }
+        const user = result[0];
+        sendUsernameEmail(email, user.username || "");
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error sending recovery email" });
+    }
+}
+
+export function sendPasswordEmail(email: string, username: string) {
     return new Promise((resolve, reject) => {
         var transporter = nodemailer.createTransport({
             service: "gmail",
@@ -454,10 +472,65 @@ export function sendEmail(email: string) {
         <div style="border-bottom:1px solid #eee">
           <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">CapyChat</a>
         </div>
-        <p style="font-size:1.1em">Hi,</p>
+        <p style="font-size:1.1em">Hi ${username},</p>
         <p>We received a request to reset your password. Your temporary password is:</p>
         <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">1234</h2>
         <p>Please ensure to change to a new, more secure password after logging in by navigating to your Profile.</p>
+        <p style="font-size:0.9em;">Regards,<br />CapyChat</p>
+        <hr style="border:none;border-top:1px solid #eee" />
+        <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+          <p>CapyChat</p>
+        </div>
+      </div>
+    </div>
+    <!-- partial -->
+      
+    </body>
+    </html>`,
+        };
+        transporter.sendMail(mail_configs, function (error, info) {
+            if (error) {
+                console.log(error);
+                return reject({ message: `An error has occured` });
+            }
+            return resolve({ message: "Email sent succesfuly" });
+        });
+    });
+}
+
+export function sendUsernameEmail(email: string, username: string) {
+    return new Promise((resolve, reject) => {
+        var transporter = nodemailer.createTransport({
+            service: "gmail",
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: "capychat1@gmail.com",
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        const mail_configs = {
+            from: "capychat1@gmail.com",
+            to: email,
+            subject: "CapyChat Password Recovery",
+            html: `<!DOCTYPE html>
+    <html lang="en" >
+    <head>
+      <meta charset="UTF-8">
+      <title>CapyChat - Password Recovery</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+    <!-- partial:index.partial.html -->
+    <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:50px auto;width:70%;padding:20px 0">
+        <div style="border-bottom:1px solid #eee">
+          <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">CapyChat</a>
+        </div>
+        <p>We received your username recovery request. Below is the username for your CapyChat account:</p>
+        <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${username}</h2>
         <p style="font-size:0.9em;">Regards,<br />CapyChat</p>
         <hr style="border:none;border-top:1px solid #eee" />
         <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
