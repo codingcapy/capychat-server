@@ -514,7 +514,7 @@ export function sendUsernameEmail(email: string, username: string) {
         const mail_configs = {
             from: "capychat1@gmail.com",
             to: email,
-            subject: "CapyChat Password Recovery",
+            subject: "CapyChat Username Recovery",
             html: `<!DOCTYPE html>
     <html lang="en" >
     <head>
