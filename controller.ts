@@ -125,7 +125,7 @@ export async function getUser(req: Request, res: Response) {
     }
 }
 
-export async function updateUser(req: Request, res: Response) {
+export async function updateUserPassword(req: Request, res: Response) {
     try {
         const userId = parseInt(req.params.userId);
         const incomingUser = await req.body;
@@ -136,7 +136,20 @@ export async function updateUser(req: Request, res: Response) {
     }
     catch (err) {
         console.log(err);
-        res.status(500).json({ success: false, message: "Error updating user" });
+        res.status(500).json({ success: false, message: "Error updating password" });
+    }
+}
+
+export async function updateUsername(req: Request, res: Response) {
+    try {
+        const userId = parseInt(req.params.userId);
+        const incomingUsername = await req.body.username;
+        await db.update(users).set({ username: incomingUsername.toString() }).where(eq(users.user_id, userId));
+        res.status(200).json({ success: true });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false, message: "Error updating username" });
     }
 }
 
